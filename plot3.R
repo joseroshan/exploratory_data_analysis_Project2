@@ -1,14 +1,13 @@
-library(plyr)
-library(ggplot2)
-# Read the data file
+# Read Data
 NEI <- readRDS("./data/exdata_data_NEI_data/summarySCC_PM25.rds")
-SCC <- readRDS("./data/exdata_data_NEI_data/Source_Classification_Code.rds")
-BaltimoreCity <- subset(NEI, fips == "24510")
-typePM25ByYear <- ddply(BaltimoreCity, .(year, type), function(x) sum(x$Emissions))
-colnames(typePM25ByYear)[3] <- "Emissions"
-png("plot3.png")
-qplot(year, Emissions, data=typePM25ByYear, color=type, geom="line") +
-  ggtitle(expression("Baltimore City" ~ PM[2.5] ~ "Emissions by Source Type and Year")) +
-  xlab("Year") +
-  ylab(expression("Total" ~ PM[2.5] ~ "Emissions (tons)"))
+# Create Data
+BC <- subset(NEI, fips == "24510")
+pd <- aggregate(BC[c("Emissions")], list(type = BC$type, year = BC$year), sum)
+# Create Plot
+png('plot3.png', width=480, height=480)
+p <- ggplot(pd, aes(x=year, y=Emissions, colour=type)) +
+  geom_point(alpha=.3) +
+  geom_smooth(alpha=.2, size=1, method="loess") +
+  ggtitle("Total Emissions by Type in Baltimore City")
+print(p)
 dev.off()
